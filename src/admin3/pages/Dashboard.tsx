@@ -118,7 +118,7 @@ const NoteDistributionChart: React.FC<{ data: ReturnType<typeof noteDistribution
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie data={data} cx="50%" cy="50%" innerRadius={60} outerRadius={90} dataKey="value" label>
-            {data.map((entry, index) => (
+            {data.map((_, index) => (
               <Cell key={`cell-${index}`} fill={["#ec4899", "#facc15"][index % 2]} />
             ))}
           </Pie>
