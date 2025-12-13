@@ -1,14 +1,11 @@
 {
   "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
   "compilerOptions": {
     "baseUrl": ".",
-    "jsx": "react-jsxdev", // or "react-jsxdev" if using dev
+    "jsx": "react-jsxdev",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*", "./*"]
     },
     "forceConsistentCasingInFileNames": true,
     "strict": true,
