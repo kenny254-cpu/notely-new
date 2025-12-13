@@ -1,11 +1,11 @@
 // app/saved/page.tsx
-"use client";
+"use client"
 
-import { useNotesStore } from "@/store/useNotesStore";
-import NoteCard from "@/components/NoteCard";
+import { useNotesStore } from "@/store/useNotesStore"
+import NoteCard from "../../components/NoteCard"
 
 export default function SavedNotes() {
-  const bookmarked = useNotesStore((s) => s.getBookmarked());
+  const bookmarked = useNotesStore((s) => s.getBookmarked())
 
   return (
     <div className="px-6 py-10 max-w-5xl mx-auto">
@@ -21,5 +21,5 @@ export default function SavedNotes() {
         </div>
       )}
     </div>
-  );
+  )
 }
