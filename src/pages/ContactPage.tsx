@@ -1,25 +1,30 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Mail, Phone, MapPin, Send, Github } from "lucide-react";
+"use client"
+
+import type React from "react"
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
+import { Mail, MapPin, Send, Github } from "lucide-react"
 
 // Use the existing color class for consistency
-const PRIMARY_COLOR_CLASS = "text-fuchsia-700 dark:text-fuchsia-500";
-const GRADIENT_CLASS = "bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 hover:from-fuchsia-700 hover:to-fuchsia-900 text-white shadow-lg shadow-fuchsia-500/50 transition-all duration-300 transform hover:scale-[1.03]";
+const PRIMARY_COLOR_CLASS = "text-fuchsia-700 dark:text-fuchsia-500"
+const GRADIENT_CLASS =
+  "bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 hover:from-fuchsia-700 hover:to-fuchsia-900 text-white shadow-lg shadow-fuchsia-500/50 transition-all duration-300 transform hover:scale-[1.03]"
 
 export function ContactPage() {
   // In a real application, you would handle form submission here,
   // potentially using a state management hook or an API call (e.g., fetch, axios).
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     // Logic to send email/form data goes here.
     // For now, we'll just log it.
-    console.log("Contact form submitted!");
-    alert("Thank you for your message! We will get back to you shortly.");
-  };
+    console.log("Contact form submitted!")
+    alert("Thank you for your message! We will get back to you shortly.")
+  }
 
   return (
     <div className="mx-auto max-w-4xl py-12 px-4">
@@ -31,7 +36,6 @@ export function ContactPage() {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        
         {/* Contact Form Card (Takes 2/3 space on medium screens) */}
         <Card className="md:col-span-2 dark:bg-gray-900/70 shadow-lg">
           <CardHeader>
@@ -59,11 +63,9 @@ export function ContactPage() {
                 <Textarea id="message" rows={5} placeholder="Type your detailed message here..." required />
               </div>
             </CardContent>
-            <CardFooter>
-              <Button type="submit" className={`w-full ${GRADIENT_CLASS}`}>
-                <Send className="w-5 h-5 mr-2" /> Send Message
-              </Button>
-            </CardFooter>
+            <Button type="submit" className={`w-full ${GRADIENT_CLASS}`}>
+              <Send className="w-5 h-5 mr-2" /> Send Message
+            </Button>
           </form>
         </Card>
 
@@ -73,28 +75,24 @@ export function ContactPage() {
             <CardTitle className="text-xl">Contact Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 text-gray-700 dark:text-gray-300">
-            
             <div className="flex items-start gap-3">
               <Mail className={`h-5 w-5 flex-shrink-0 mt-1 ${PRIMARY_COLOR_CLASS}`} />
               <div>
                 <p className="font-semibold text-gray-900 dark:text-white">Support Email</p>
-                <a 
-                  href="mailto:gitaumark502@gmail.com" 
-                  className={`text-sm hover:underline ${PRIMARY_COLOR_CLASS}`}
-                >
+                <a href="mailto:gitaumark502@gmail.com" className={`text-sm hover:underline ${PRIMARY_COLOR_CLASS}`}>
                   gitaumark502@gmail.com
                 </a>
               </div>
             </div>
 
             <Separator className="dark:bg-gray-700" />
-            
+
             <div className="flex items-start gap-3">
               <Github className={`h-5 w-5 flex-shrink-0 mt-1 ${PRIMARY_COLOR_CLASS}`} />
               <div>
                 <p className="font-semibold text-gray-900 dark:text-white">GitHub</p>
-                <a 
-                  href="https://github.com/de-scientist" 
+                <a
+                  href="https://github.com/de-scientist"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`text-sm hover:underline ${PRIMARY_COLOR_CLASS}`}
@@ -114,10 +112,9 @@ export function ContactPage() {
                 <p className="text-sm">Operating globally, 24/7</p>
               </div>
             </div>
-
           </CardContent>
         </Card>
       </div>
     </div>
-  );
+  )
 }
