@@ -32,7 +32,7 @@ export default function Home() {
           <div className="mb-16 space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
               <Sparkles className="h-4 w-4" />
-              Beautiful note-taking experience
+              Now with full theme support - Light, Dark & System modes
             </div>
 
             <h2 className="text-5xl font-bold tracking-tight text-foreground text-balance leading-tight">
@@ -139,8 +139,9 @@ export default function Home() {
             <CardHeader>
               <CardTitle className="text-2xl">Theme Customization</CardTitle>
               <CardDescription className="text-base">
-                Switch between light, dark, and system themes using the toggle in the top right corner. Your preference
-                is automatically saved and synced across all your sessions.
+                Switch seamlessly between light, dark, and system themes using the toggle in the top right corner. Your
+                preference is automatically saved and synced across all your sessions. The system mode intelligently
+                matches your device settings for a truly adaptive experience.
               </CardDescription>
             </CardHeader>
             <CardContent>

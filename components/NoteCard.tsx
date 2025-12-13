@@ -4,6 +4,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Lock, Unlock, Clock, ArrowRight } from "lucide-react"
 import type { Note } from "@/store/useNotesStore"
 
+export type { Note }
+
 export default function NoteCard({ note }: { note: Note }) {
   const isPublic = note.isPublic ?? false
 

@@ -1,4 +1,4 @@
-# Theme toggle for Notely
+# Notely - Modern Note-Taking App
 
 *Automatically synced with your [v0.app](https://v0.app) deployments*
 
@@ -7,8 +7,15 @@
 
 ## Overview
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+Notely is a beautiful, modern note-taking application built with React, TypeScript, Next.js, and Tailwind CSS. It features a clean, intuitive interface with full theme customization support.
+
+### Key Features
+
+- **Theme Toggle**: Seamlessly switch between Light, Dark, and System modes
+- **Beautiful UI**: Clean, modern design with smooth transitions
+- **Responsive**: Works perfectly on all device sizes
+- **Built with shadcn/ui**: High-quality, accessible components
+- **Type-Safe**: Full TypeScript support throughout
 
 ## Deployment
 
@@ -28,3 +35,13 @@ Continue building your app on:
 2. Deploy your chats from the v0 interface
 3. Changes are automatically pushed to this repository
 4. Vercel deploys the latest version from this repository
+
+## Theme System
+
+The app includes a fully functional theme toggle system with three modes:
+
+- **Light Mode**: Clean, bright interface for daytime use
+- **Dark Mode**: Easy on the eyes for low-light environments  
+- **System Mode**: Automatically syncs with your OS theme preference
+
+Theme preferences are persisted across sessions using `next-themes`.
