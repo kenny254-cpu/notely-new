@@ -9,8 +9,9 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Notely - Your Notes, Organized",
-  description: "A modern note-taking app built with React and TypeScript",
+  title: "Notely - Your Notes, Beautifully Organized",
+  description:
+    "A modern, elegant note-taking app with powerful organization features, rich text editing, and seamless theme switching between light and dark modes.",
   generator: "v0.app",
   icons: {
     icon: [
