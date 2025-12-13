@@ -23,12 +23,8 @@ const GRADIENT_CLASS =
   "bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 hover:from-fuchsia-700 hover:to-fuchsia-900 text-white shadow-lg shadow-fuchsia-500/50 transition-all duration-300 transform hover:scale-[1.03]"
 const INPUT_RING_CLASS = "focus:ring-fuchsia-500 focus:border-fuchsia-600 dark:focus:ring-fuchsia-500/50"
 
-const GOOGLE_BUTTON_CLASS =
-  "bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-gray-300 border border-gray-300 hover:border-gray-400 transition-all duration-300 transform hover:scale-[1.03] shadow-md shadow-gray-300/50"
 const GITHUB_BUTTON_CLASS =
   "bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 transition-all duration-300 transform hover:scale-[1.03] shadow-lg shadow-gray-900/50"
-
-const BACKEND_URL = "http://localhost:5000"
 
 const icons: Record<string, React.ReactElement> = {
   firstName: <User className="h-5 w-5" />,
