@@ -6,6 +6,11 @@
   "tailwind": {
     "config": "",
     "css": "src/index.css",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "app/globals.css",
     "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
@@ -19,4 +24,5 @@
     "hooks": "@/hooks"
   },
   "registries": {}
+  "iconLibrary": "lucide"
 }
