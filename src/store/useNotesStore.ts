@@ -1,27 +1,35 @@
-// store/useNotesStore.ts
+interface Note {
+  id: string
+  title: string
+  content: string
+  isBookmarked: boolean
+  createdAt: string
+  updatedAt: string
+}
 
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+interface NotesState {
+  notes: Note[]
+  toggleBookmark: (id: string) => void
+  getBookmarked: () => Note[]
+}
 
-export const useNotesStore = create(
+import { create } from "zustand"
+import { persist } from "zustand/middleware"
+
+export const useNotesStore = create<NotesState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       notes: [],
 
-      toggleBookmark: (id) =>
+      toggleBookmark: (id: string) =>
         set((state) => ({
-          notes: state.notes.map((n) =>
-            n.id === id ? { ...n, isBookmarked: !n.isBookmarked } : n
-          ),
+          notes: state.notes.map((n: Note) => (n.id === id ? { ...n, isBookmarked: !n.isBookmarked } : n)),
         })),
 
-      getBookmarked: () =>
-        useNotesStore
-          .getState()
-          .notes.filter((n) => n.isBookmarked === true),
+      getBookmarked: () => get().notes.filter((n: Note) => n.isBookmarked === true),
     }),
     {
-      name: "notes-storage", // localStorage key
-    }
-  )
-);
+      name: "notes-storage",
+    },
+  ),
+)
