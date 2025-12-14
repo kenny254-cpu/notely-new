@@ -14,8 +14,9 @@ import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { Loader2, Lock, User, Eye, EyeOff, Mail } from "lucide-react"
 
-const PRIMARY_TEXT_CLASS = "text-foreground hover:text-primary transition-colors"
-const GRADIENT_BUTTON_CLASS = "bg-foreground text-background hover:bg-foreground/90 font-semibold transition-all"
+const PRIMARY_TEXT_CLASS = "text-primary hover:underline transition-colors"
+const GRADIENT_BUTTON_CLASS =
+  "bg-foreground text-background hover:bg-foreground/90 font-semibold transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
 
 async function loginWithProvider(provider: "google" | "github") {
   const { error } = await supabase.auth.signInWithOAuth({
@@ -127,53 +128,55 @@ export function LoginPage() {
   }
 
   return (
-    <div className="mx-auto mt-16 max-w-sm">
-      <Card className="shadow-2xl">
-        <CardHeader className="text-center space-y-2">
-          <Lock className="h-8 w-8 mx-auto text-foreground" />
+    <div className="mx-auto mt-16 mb-10 max-w-md px-4">
+      <Card className="shadow-2xl rounded-xl overflow-hidden border border-border">
+        <CardHeader className="text-center space-y-3 bg-accent/30 p-6">
+          <Lock className="h-10 w-10 mx-auto text-primary" />
           <CardTitle className="text-3xl font-bold">Welcome Back</CardTitle>
-          <CardDescription>Sign in to continue using Notely.</CardDescription>
+          <CardDescription className="text-base">Sign in to continue using Notely.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <SocialLoginButtons />
           <OrSeparator />
           <form onSubmit={onSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label>Email or Username</Label>
+              <Label className="text-sm font-medium">Email or Username</Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <User className="absolute left-3 top-[50%] translate-y-[-50%] h-5 w-5 text-muted-foreground pointer-events-none z-10" />
                 <Input
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   required
+                  placeholder="Enter your email or username"
                   autoComplete="username"
-                  className="pl-10"
+                  className="pl-10 h-12 text-base rounded-lg shadow-sm"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Password</Label>
+              <Label className="text-sm font-medium">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-[50%] translate-y-[-50%] h-5 w-5 text-muted-foreground pointer-events-none z-10" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  placeholder="Enter your password"
                   autoComplete="current-password"
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 h-12 text-base rounded-lg shadow-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  className="absolute right-3 top-[50%] translate-y-[-50%] text-muted-foreground hover:text-foreground transition-colors z-10"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
             {error && (
-              <div className="space-y-2 text-center">
+              <div className="space-y-2 text-center bg-destructive/10 p-4 rounded-lg border border-destructive/20">
                 <p className="text-sm font-medium text-destructive">{error}</p>
                 {isEmail && (
                   <Button
@@ -181,7 +184,7 @@ export function LoginPage() {
                     variant="outline"
                     onClick={handleResendVerification}
                     disabled={resending}
-                    className="w-full flex gap-2 justify-center bg-transparent"
+                    className="w-full flex gap-2 justify-center mt-2 bg-transparent"
                   >
                     {resending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
                     Resend verification email
@@ -189,14 +192,21 @@ export function LoginPage() {
                 )}
               </div>
             )}
-            <Button type="submit" disabled={mutation.isPending} className={`w-full text-base ${GRADIENT_BUTTON_CLASS}`}>
+            <Button
+              type="submit"
+              disabled={mutation.isPending}
+              className={`w-full text-lg h-12 ${GRADIENT_BUTTON_CLASS} rounded-lg`}
+            >
               {mutation.isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Logging in...
                 </>
               ) : (
-                "Log in"
+                <>
+                  <Lock className="mr-2 h-5 w-5" />
+                  Log in
+                </>
               )}
             </Button>
           </form>

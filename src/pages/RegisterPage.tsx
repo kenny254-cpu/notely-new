@@ -11,20 +11,19 @@ import { api } from "../lib/api"
 import { Button } from "../components/ui/button"
 import { Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription } from "../components/ui/card"
 import { Input } from "../components/ui/input"
-import { Label } from "../components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert"
 import { Separator } from "../components/ui/separator"
 
 import { Loader2, UserPlus, AlertTriangle, CheckCircle, User, Mail, Lock, Eye, EyeOff, X, Check } from "lucide-react"
 import { supabase } from "../lib/supabase"
 
-const PRIMARY_COLOR_CLASS = "text-fuchsia-700 dark:text-fuchsia-500"
+const PRIMARY_COLOR_CLASS = "text-primary"
 const GRADIENT_CLASS =
-  "bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 hover:from-fuchsia-700 hover:to-fuchsia-900 text-white shadow-lg shadow-fuchsia-500/50 transition-all duration-300 transform hover:scale-[1.03]"
-const INPUT_RING_CLASS = "focus:ring-fuchsia-500 focus:border-fuchsia-600 dark:focus:ring-fuchsia-500/50"
+  "bg-foreground text-background hover:bg-foreground/90 shadow-lg transition-all duration-300 transform hover:scale-[1.02]"
+const INPUT_RING_CLASS = "focus:ring-ring focus:border-input"
 
 const GITHUB_BUTTON_CLASS =
-  "bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 transition-all duration-300 transform hover:scale-[1.03] shadow-lg shadow-gray-900/50"
+  "bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
 
 const icons: Record<string, React.ReactElement> = {
   firstName: <User className="h-5 w-5" />,
@@ -200,13 +199,11 @@ export function RegisterPage() {
 
   return (
     <div className="mx-auto mt-10 mb-10 max-w-lg">
-      <Card className="shadow-2xl dark:bg-gray-800 rounded-xl overflow-hidden border border-fuchsia-200 dark:border-fuchsia-900/50">
-        <CardHeader className="text-center space-y-3 bg-fuchsia-50 dark:bg-gray-900 p-6">
+      <Card className="shadow-2xl rounded-xl overflow-hidden border border-border">
+        <CardHeader className="text-center space-y-3 bg-accent/30 p-6">
           <UserPlus className={`h-10 w-10 ${PRIMARY_COLOR_CLASS} mx-auto`} />
-          <CardTitle className="text-3xl font-bold dark:text-white">Join Notely</CardTitle>
-          <CardDescription className="text-gray-700 dark:text-gray-400">
-            Capture, organize, and share your thoughts with ease.
-          </CardDescription>
+          <CardTitle className="text-3xl font-bold">Join Notely</CardTitle>
+          <CardDescription>Capture, organize, and share your thoughts with ease.</CardDescription>
         </CardHeader>
 
         <CardContent className="pt-6">
@@ -265,7 +262,7 @@ export function RegisterPage() {
                   return (
                     <div key={field} className={`relative flex-1 ${row.length > 1 ? "min-w-0" : "w-full"}`}>
                       {icons[field] && (
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-fuchsia-500 z-10">
+                        <div className="absolute left-3 top-[50%] translate-y-[-50%] text-muted-foreground pointer-events-none z-10">
                           {icons[field]}
                         </div>
                       )}
@@ -275,37 +272,26 @@ export function RegisterPage() {
                         value={value}
                         onChange={(e) => setter(e.target.value)}
                         required
-                        placeholder=" "
+                        placeholder={label}
                         autoComplete={getAutocompleteValue(field)}
-                        className={`peer pl-10 pr-10 rounded-lg shadow-sm transition h-11 text-base ${INPUT_RING_CLASS} ${validationColor}`}
+                        className={`peer pl-10 pr-10 rounded-lg shadow-sm transition h-12 text-base ${INPUT_RING_CLASS} ${validationColor}`}
                       />
-
-                      <Label
-                        className={`absolute left-10 text-gray-400 text-sm transition-all pointer-events-none 
-                                                    peer-placeholder-shown:top-[12px] peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-base 
-                                                    peer-focus:-top-2.5 peer-focus:text-sm ${PRIMARY_COLOR_CLASS}
-                                                    ${value ? "-top-2.5 text-sm" : "top-[12px] text-base"}
-                                                    bg-card px-1 ml-[-4px]`}
-                        htmlFor={field}
-                      >
-                        {label}
-                      </Label>
 
                       {isPassword && (
                         <div
                           onClick={() => toggle(!show)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer hover:text-fuchsia-700 dark:hover:text-fuchsia-400 transition-transform active:scale-95 z-10"
+                          className="absolute right-3 top-[50%] translate-y-[-50%] cursor-pointer hover:text-primary transition-transform active:scale-95 z-10"
                         >
                           {show ? (
-                            <EyeOff className="h-5 w-5 text-fuchsia-700 dark:text-fuchsia-400" />
+                            <EyeOff className="h-5 w-5 text-muted-foreground hover:text-foreground" />
                           ) : (
-                            <Eye className="h-5 w-5 text-fuchsia-700 dark:text-fuchsia-400" />
+                            <Eye className="h-5 w-5 text-muted-foreground hover:text-foreground" />
                           )}
                         </div>
                       )}
 
                       {!isPassword && validationIcon && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10">{validationIcon}</div>
+                        <div className="absolute right-3 top-[50%] translate-y-[-50%] z-10">{validationIcon}</div>
                       )}
 
                       {isUsername && value && usernameAvailable !== null && (
@@ -413,16 +399,20 @@ export function RegisterPage() {
               <img
                 src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
                 className="h-5 w-5 mr-2"
-                title="google"
+                alt="Google"
               />
               Continue with Google
             </Button>
 
-            <Button type="button" onClick={() => handleOAuth("github")} className={GITHUB_BUTTON_CLASS}>
+            <Button
+              type="button"
+              onClick={() => handleOAuth("github")}
+              className={`w-full h-12 ${GITHUB_BUTTON_CLASS}`}
+            >
               <img
                 src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg"
                 className="h-5 w-5 mr-2"
-                title="github"
+                alt="GitHub"
               />
               Continue with GitHub
             </Button>
@@ -431,13 +421,10 @@ export function RegisterPage() {
           <Separator className="my-6" />
         </CardContent>
 
-        <CardFooter className="flex justify-center border-t pt-4 dark:border-gray-700">
-          <p className="text-sm text-muted-foreground dark:text-gray-400">
+        <CardFooter className="flex justify-center border-t pt-4">
+          <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link
-              to="/login"
-              className={`font-semibold ${PRIMARY_COLOR_CLASS} hover:text-fuchsia-700/80 dark:hover:text-fuchsia-500/80 transition-colors`}
-            >
+            <Link to="/login" className={`font-semibold ${PRIMARY_COLOR_CLASS} hover:underline transition-colors`}>
               Log in
             </Link>
           </p>
