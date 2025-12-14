@@ -1,6 +1,6 @@
 // 💜 Define OneNote-inspired color palette variables
 // We'll use Tailwind's `fuchsia` or `purple` and adjust the shades for the primary color.
-const PRIMARY_COLOR_CLASS = "text-fuchsia-700 dark:text-fuchsia-500"
+const PRIMARY_TEXT_CLASS = "text-foreground hover:text-primary transition-colors"
 
 import { Separator } from "@/components/ui/separator"
 // NEW Icon: MessageSquare for Contact
@@ -23,21 +23,15 @@ import {
 const currentYear = new Date().getFullYear()
 
 export default function AppFooter() {
-  // Helper function to safely extract base classes for hover states
-  const getHoverClass = () => {
-    const parts = PRIMARY_COLOR_CLASS.replace("text", "text").split(" ")
-    return `hover:${parts[0]} dark:hover:${parts[1]}`
-  }
-
   return (
-    <footer className="w-full bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-16">
+    <footer className="w-full bg-muted/50 border-t border-border mt-16">
       <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Updated Grid: 2 columns on small, 4 columns on medium */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
           {/* 1. Brand & Mission (Notely Focused) */}
           <div className="col-span-2 md:col-span-1">
-            <h2 className={`text-3xl font-extrabold tracking-tight ${PRIMARY_COLOR_CLASS}`}>Notely</h2>
-            <p className="text-sm text-gray-700 dark:text-gray-400 mt-3 leading-relaxed">
+            <h2 className="text-2xl font-bold tracking-tight">Notely</h2>
+            <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
               Capture thoughts, organize ideas, and manage tasks effortlessly. Your knowledge hub, always at your
               fingertips.
             </p>
@@ -45,46 +39,26 @@ export default function AppFooter() {
 
           {/* 2. Quick Links (Application Navigation) */}
           <div className="md:col-span-1">
-            <h3
-              className={`text-lg font-bold mb-4 text-gray-900 dark:text-white border-l-2 ${PRIMARY_COLOR_CLASS.replace("text", "border")} pl-2`}
-            >
-              App Navigation
-            </h3>
-            <ul className="space-y-3 text-gray-700 dark:text-gray-300 text-base">
+            <h3 className="text-base font-semibold mb-4 border-l-2 border-foreground pl-2">App Navigation</h3>
+            <ul className="space-y-3 text-sm text-muted-foreground">
               <li>
-                <a
-                  href="/app/notes"
-                  className={`${getHoverClass()} transition-colors flex items-center gap-2`}
-                  aria-label="Go to My Notes page"
-                >
-                  <BookOpen className="h-4 w-4" /> My Notes
+                <a href="/app/notes" className={PRIMARY_TEXT_CLASS}>
+                  <BookOpen className="h-4 w-4 inline mr-2" /> My Notes
                 </a>
               </li>
               <li>
-                <a
-                  href="/app/notes/new"
-                  className={`${getHoverClass()} transition-colors flex items-center gap-2`}
-                  aria-label="Create a new note entry"
-                >
-                  <FilePlus className="h-4 w-4" /> New Entry
+                <a href="/app/notes/new" className={PRIMARY_TEXT_CLASS}>
+                  <FilePlus className="h-4 w-4 inline mr-2" /> New Entry
                 </a>
               </li>
               <li>
-                <a
-                  href="/app/profile"
-                  className={`${getHoverClass()} transition-colors flex items-center gap-2`}
-                  aria-label="Go to Profile settings"
-                >
-                  <User className="h-4 w-4" /> Profile
+                <a href="/app/profile" className={PRIMARY_TEXT_CLASS}>
+                  <User className="h-4 w-4 inline mr-2" /> Profile
                 </a>
               </li>
               <li>
-                <a
-                  href="/app/trash"
-                  className={`${getHoverClass()} transition-colors flex items-center gap-2`}
-                  aria-label="Go to Trash/Recycle Bin"
-                >
-                  <Trash2 className="h-4 w-4" /> Trash
+                <a href="/app/trash" className={PRIMARY_TEXT_CLASS}>
+                  <Trash2 className="h-4 w-4 inline mr-2" /> Trash
                 </a>
               </li>
             </ul>
@@ -92,47 +66,27 @@ export default function AppFooter() {
 
           {/* 3. Legal & Support (UX Improvement: Essential Links) */}
           <div className="md:col-span-1">
-            <h3
-              className={`text-lg font-bold mb-4 text-gray-900 dark:text-white border-l-2 ${PRIMARY_COLOR_CLASS.replace("text", "border")} pl-2`}
-            >
-              Legal & Support
-            </h3>
-            <ul className="space-y-3 text-gray-700 dark:text-gray-300 text-base">
+            <h3 className="text-base font-semibold mb-4 border-l-2 border-foreground pl-2">Legal & Support</h3>
+            <ul className="space-y-3 text-sm text-muted-foreground">
               <li>
-                <a
-                  href="/privacy"
-                  className={`${getHoverClass()} transition-colors flex items-center gap-2`}
-                  aria-label="Read our Privacy Policy"
-                >
-                  <Shield className="h-4 w-4" /> Privacy Policy
+                <a href="/privacy" className={PRIMARY_TEXT_CLASS}>
+                  <Shield className="h-4 w-4 inline mr-2" /> Privacy Policy
                 </a>
               </li>
               <li>
-                <a
-                  href="/terms"
-                  className={`${getHoverClass()} transition-colors flex items-center gap-2`}
-                  aria-label="Read our Terms of Service"
-                >
-                  <FileText className="h-4 w-4" /> Terms of Service
+                <a href="/terms" className={PRIMARY_TEXT_CLASS}>
+                  <FileText className="h-4 w-4 inline mr-2" /> Terms of Service
                 </a>
               </li>
               <li>
-                <a
-                  href="/help"
-                  className={`${getHoverClass()} transition-colors flex items-center gap-2`}
-                  aria-label="Go to Help Center"
-                >
-                  <LifeBuoy className="h-4 w-4" /> Help Center
+                <a href="/help" className={PRIMARY_TEXT_CLASS}>
+                  <LifeBuoy className="h-4 w-4 inline mr-2" /> Help Center
                 </a>
               </li>
               {/* 🎯 NEW LINK: Contact Page */}
               <li>
-                <a
-                  href="/contact"
-                  className={`${getHoverClass()} transition-colors flex items-center gap-2`}
-                  aria-label="Contact Us"
-                >
-                  <MessageSquare className="h-4 w-4" /> Contact Us
+                <a href="/contact" className={PRIMARY_TEXT_CLASS}>
+                  <MessageSquare className="h-4 w-4 inline mr-2" /> Contact Us
                 </a>
               </li>
             </ul>
@@ -140,56 +94,46 @@ export default function AppFooter() {
 
           {/* 4. Connect/Socials (Developer Links) */}
           <div className="md:col-span-1">
-            <h3
-              className={`text-lg font-bold mb-4 text-gray-900 dark:text-white border-l-2 ${PRIMARY_COLOR_CLASS.replace("text", "border")} pl-2`}
-            >
-              Built by Mark Gitau
-            </h3>
-            <ul className="space-y-3 text-base text-gray-700 dark:text-gray-300">
-              <li className="flex items-center gap-3">
-                <Github className={`h-5 w-5 ${PRIMARY_COLOR_CLASS}`} />
+            <h3 className="text-base font-semibold mb-4 border-l-2 border-foreground pl-2">Built by Mark Gitau</h3>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <Github className="h-4 w-4" />
                 <a
                   href="https://github.com/de-scientist"
                   target="_blank"
-                  className={`${getHoverClass()} transition-colors font-medium`}
+                  className={PRIMARY_TEXT_CLASS}
                   rel="noopener noreferrer"
-                  aria-label="View source code on GitHub"
                 >
-                  GitHub / View Source
+                  GitHub
                 </a>
               </li>
-              <Separator className="bg-gray-200 dark:bg-gray-700 my-2" />
-              <li className="flex items-center gap-3">
-                <Mail className={`h-5 w-5 ${PRIMARY_COLOR_CLASS}`} />
-                <a
-                  href="mailto:gitaumark502@gmail.com"
-                  className={`${getHoverClass()} transition-colors font-medium`}
-                  aria-label="Send support email"
-                >
-                  Support Email
+              <Separator className="my-2" />
+              <li className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                <a href="mailto:gitaumark502@gmail.com" className={PRIMARY_TEXT_CLASS}>
+                  Email
                 </a>
               </li>
-              <li className="flex items-center gap-3">
-                <Globe className={`h-5 w-5 ${PRIMARY_COLOR_CLASS}`} />
+              <li className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
                 <a
                   href="https://1descientist.vercel.app/"
                   target="_blank"
-                  className={`${getHoverClass()} transition-colors font-medium`}
+                  className={PRIMARY_TEXT_CLASS}
                   rel="noopener noreferrer"
-                  aria-label="Visit the developer's portfolio"
                 >
-                  Developer Portfolio
+                  Portfolio
                 </a>
               </li>
             </ul>
           </div>
         </div>
 
-        <Separator className="my-10 bg-gray-300 dark:bg-gray-700" />
+        <Separator className="my-10" />
 
         {/* Bottom Section (Copyright) */}
-        <div className="text-center text-sm text-gray-600 dark:text-gray-500">
-          © {currentYear} **Notely App**. All rights reserved.
+        <div className="text-center text-sm text-muted-foreground">
+          © {currentYear} Notely App. All rights reserved.
           <span className="flex items-center justify-center mt-1">
             Crafted with <Heart className="h-4 w-4 mx-1 text-red-500" fill="currentColor" /> for productivity.
           </span>
