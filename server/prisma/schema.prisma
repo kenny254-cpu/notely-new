@@ -19,9 +19,6 @@ model User {
   lastProfileUpdate DateTime @updatedAt @map("Last_Profile_Update")
   isDeleted         Boolean  @default(false) @map("Is_Deleted")
 
-  emailVerified     Boolean  @default(false)
-  emailVerifiedAt   DateTime?
-
   provider          String?
   providerId        String?
   supabaseId        String   @unique
@@ -29,6 +26,7 @@ model User {
   categories Category[]
   entries    Entry[]
   bookmarks  Bookmark[]
+  contacts   Contact[] // Added relation to Contact model
 
   @@index([email])
   @@index([username])
@@ -131,4 +129,17 @@ model Doc {
   createdAt DateTime @default(now())
 
   @@index([createdAt])
+}
+
+model Contact {
+  id        String   @id @default(uuid()) @map("ContactId")
+  userId    String?  @map("UserId")
+  user      User?    @relation(fields: [userId], references: [id])
+  name      String   @map("Name")
+  email     String   @map("Email")
+  subject   String   @map("Subject")
+  message   String   @map("Message") @db.Text
+  createdAt DateTime @default(now()) @map("Date_Created")
+  
+  @@map("Contacts")
 }

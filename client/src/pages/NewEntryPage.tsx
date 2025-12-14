@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "../lib/api"
+import { useAuthStore } from "../store/authStore" // Added import for useAuthStore
 
 // New component imports for better UI/UX
 import { Button } from "../components/ui/button"
@@ -82,6 +83,7 @@ interface AiGenerationResponse {
 export function NewEntryPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const userId = useAuthStore.getState().userId // Added line to get userId from auth store
 
   // --- State & Data Fetching ---
   const { data, isLoading: isLoadingCategories } = useQuery({
@@ -118,7 +120,11 @@ export function NewEntryPage() {
   // --- 1. Entry Creation Mutation (Manual Save) ---
   const creationMutation = useMutation({
     mutationFn: async () => {
-      const res = await api.post("/entries", { title, synopsis, content, categoryId })
+      if (!userId) {
+        throw new Error("User not authenticated")
+      }
+
+      const res = await api.post("/entries", { title, synopsis, content, categoryId, authorId: userId })
       return res.data.entry as { id: string }
     },
     onSuccess: (entry) => {
@@ -132,7 +138,9 @@ export function NewEntryPage() {
   // --- 2. AI Generation Mutation (Generate full note) ---
   const generationMutation = useMutation({
     mutationFn: async () => {
-      const AUTHOR_ID = "user-123" // TODO: Replace with real logged-in user's ID
+      if (!userId) {
+        throw new Error("User not authenticated")
+      }
 
       const res = await api.post("/notes/generate", {
         title,
@@ -141,7 +149,7 @@ export function NewEntryPage() {
         tone: aiTone,
         length: aiLength,
         save: aiSaveToDb,
-        authorId: AUTHOR_ID,
+        authorId: userId,
         categoryId: categoryId,
       })
       return res.data as AiGenerationResponse
@@ -154,7 +162,7 @@ export function NewEntryPage() {
         queryClient.invalidateQueries({ queryKey: ["entries"] })
         navigate(`/app/notes/${data.saved.id}`)
       } else {
-        setPageError("Note generated successfully and loaded into editor.")
+        setPageError(null)
       }
     },
     onError: (err: any) => setPageError(err?.response?.data?.error ?? "AI note generation failed. Please try again."),
@@ -181,9 +189,12 @@ export function NewEntryPage() {
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
     setPageError(null)
-    if (!title.trim() || !synopsis.trim() || !content.trim())
-      return setPageError("Title, Synopsis, and Content cannot be empty.")
+
+    if (!title.trim()) return setPageError("Title is required.")
+    if (!synopsis.trim()) return setPageError("Synopsis is required.")
+    if (!content.trim()) return setPageError("Content is required.")
     if (!categoryId) return setPageError("Please select a category.")
+
     creationMutation.mutate()
   }
 
