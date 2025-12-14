@@ -262,7 +262,7 @@ export function RegisterPage() {
                   return (
                     <div key={field} className={`relative flex-1 ${row.length > 1 ? "min-w-0" : "w-full"}`}>
                       {icons[field] && (
-                        <div className="absolute left-3 top-[50%] translate-y-[-50%] text-muted-foreground pointer-events-none z-10">
+                        <div className="absolute left-3 top-3 text-muted-foreground pointer-events-none z-10">
                           {icons[field]}
                         </div>
                       )}
@@ -280,7 +280,7 @@ export function RegisterPage() {
                       {isPassword && (
                         <div
                           onClick={() => toggle(!show)}
-                          className="absolute right-3 top-[50%] translate-y-[-50%] cursor-pointer hover:text-primary transition-transform active:scale-95 z-10"
+                          className="absolute right-3 top-3 cursor-pointer hover:text-primary transition-transform active:scale-95 z-10"
                         >
                           {show ? (
                             <EyeOff className="h-5 w-5 text-muted-foreground hover:text-foreground" />
@@ -291,7 +291,7 @@ export function RegisterPage() {
                       )}
 
                       {!isPassword && validationIcon && (
-                        <div className="absolute right-3 top-[50%] translate-y-[-50%] z-10">{validationIcon}</div>
+                        <div className="absolute right-3 top-3 z-10">{validationIcon}</div>
                       )}
 
                       {isUsername && value && usernameAvailable !== null && (
@@ -305,14 +305,14 @@ export function RegisterPage() {
                         </p>
                       )}
                       {field === "password" && value && (
-                        <div className="space-y-1 mt-1">
-                          <div className="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div className="space-y-2 mt-3">
+                          <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                             <div
                               className={`h-2 rounded-full ${strengthColor[passwordStrength - 1] || "bg-red-400"} transition-all duration-300`}
                               style={{ width: `${(passwordStrength / 4) * 100}%` }}
                             />
                           </div>
-                          <p className={`text-xs font-medium ${PRIMARY_COLOR_CLASS}`}>
+                          <p className="text-xs font-medium text-foreground">
                             Strength:{" "}
                             {passwordStrength === 4
                               ? "Strong"
@@ -322,17 +322,19 @@ export function RegisterPage() {
                                   ? "Weak"
                                   : ""}
                           </p>
-                          <ul className="text-xs text-gray-600 dark:text-gray-400 grid grid-cols-2 gap-x-4">
+                          <ul className="text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
                             {Object.entries(passwordCriteria).map(([key, passed]) => (
                               <li
                                 key={key}
-                                className={`flex items-center gap-1 ${passed ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                                className={`flex items-center gap-1.5 ${passed ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}
                               >
                                 {passed ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
-                                {key === "minLength" && "8+ characters"}
-                                {key === "hasUppercase" && "Uppercase letter"}
-                                {key === "hasNumber" && "A number (0-9)"}
-                                {key === "hasSymbol" && "A symbol (!@#$)"}
+                                <span>
+                                  {key === "minLength" && "8+ characters"}
+                                  {key === "hasUppercase" && "Uppercase"}
+                                  {key === "hasNumber" && "Number"}
+                                  {key === "hasSymbol" && "Symbol"}
+                                </span>
                               </li>
                             ))}
                           </ul>

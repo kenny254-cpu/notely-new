@@ -142,8 +142,8 @@ const Dashboard: FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen-minus-header">
-        <Loader2 className="h-10 w-10 animate-spin text-fuchsia-600" />
-        <p className="ml-3 text-lg text-gray-600">Loading dashboard data...</p>
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="ml-3 text-lg text-muted-foreground">Loading dashboard data...</p>
       </div>
     )
   }
@@ -151,14 +151,14 @@ const Dashboard: FC = () => {
   if (isError || !stats) {
     return (
       <div className="p-6">
-        <Card className="border-red-500 bg-red-50">
+        <Card className="border-destructive bg-destructive/10">
           <CardHeader>
-            <CardTitle className="text-red-600 flex items-center">
+            <CardTitle className="text-destructive flex items-center">
               <AlertTriangle className="mr-2 h-5 w-5" /> API Error
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-red-500">Failed to load live admin statistics. Please check server connection.</p>
+            <p className="text-destructive">Failed to load live admin statistics. Please check server connection.</p>
           </CardContent>
         </Card>
       </div>
@@ -166,8 +166,8 @@ const Dashboard: FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">Analytics Overview</h1>
+    <div className="p-6 space-y-8 bg-background min-h-screen">
+      <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Analytics Overview</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
@@ -175,28 +175,28 @@ const Dashboard: FC = () => {
           value={stats.totalUsers.toLocaleString()}
           icon={Users}
           description="Total registered accounts"
-          color="#a855f7"
+          color="hsl(var(--primary))"
         />
         <MetricCard
           title="Total Notes"
           value={stats.totalNotes.toLocaleString()}
           icon={Feather}
           description="Total notes created by users"
-          color="#ec4899"
+          color="hsl(var(--primary))"
         />
         <MetricCard
           title="AI Generated"
           value={stats.totalAiNotes.toLocaleString()}
           icon={DollarSign}
           description="Notes generated using AI tools"
-          color="#facc15"
+          color="hsl(var(--primary))"
         />
         <MetricCard
           title="Pending Inbox"
           value={stats.pendingMessages}
           icon={MessageSquare}
           description="Unread support messages"
-          color="#f97316"
+          color="hsl(var(--primary))"
         />
       </div>
 

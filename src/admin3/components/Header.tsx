@@ -84,33 +84,25 @@ function AdminUserNav() {
 const Header: React.FC = () => {
   const { filter, setFilter } = useAdminStore()
 
-  // Placeholder function for Dark Mode toggle
   const toggleDarkMode = () => {
-    // In a real app, this would change a theme context or add/remove a 'dark' class on the HTML tag
     console.log("Toggling Dark Mode...")
   }
 
-  // Placeholder function for Mobile Nav
   const handleMobileNavToggle = () => {
     console.log("Toggling Mobile Navigation...")
   }
 
   return (
-    // Updated styling for modern admin panel header
-    <header className="flex items-center justify-between border-b dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-3 sticky top-0 z-50">
-      {/* Left Side: Title and Mobile Toggle */}
+    <header className="flex items-center justify-between border-b bg-background px-6 py-3 sticky top-0 z-50 shadow-sm">
       <div className="flex items-center space-x-4">
-        {/* Mobile menu toggle (assuming a responsive sidebar) */}
         <Button variant="ghost" size="icon" onClick={handleMobileNavToggle} className="md:hidden">
           <Menu className="h-6 w-6" />
         </Button>
 
-        <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">Admin Dashboard</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Admin Dashboard</h1>
       </div>
 
-      {/* Right Side: Search, Theme Toggle, and User */}
       <div className="flex items-center space-x-4">
-        {/* Search Input using Shadcn Input */}
         <div className="relative hidden sm:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -122,15 +114,12 @@ const Header: React.FC = () => {
           />
         </div>
 
-        {/* Dark Mode Toggle */}
         <Button variant="ghost" size="icon" onClick={toggleDarkMode} aria-label="Toggle dark mode">
-          {/* Replace with logic to determine current mode */}
           <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>
         </Button>
 
-        {/* Admin User Navigation */}
         <AdminUserNav />
       </div>
     </header>
