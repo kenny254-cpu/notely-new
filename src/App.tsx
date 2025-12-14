@@ -66,11 +66,7 @@ function UserNav() {
 
   // Use a function to safely call logout and handle navigation/UI state
   const handleLogout = () => {
-    // Assuming logout is a synchronous action on the store
-    // In a real app, you might await an API call here.
-    // @ts-ignore - Assuming logout exists on useAuthStore
     clear()
-    // No need to navigate, as ProtectedRoute will handle redirect.
   }
 
   if (!user) return null
