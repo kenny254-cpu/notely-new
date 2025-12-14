@@ -37,11 +37,6 @@ import {
 } from "./components/ui/dropdown-menu"
 import { LogOut, Settings, Feather } from "lucide-react"
 
-const PRIMARY_TEXT_CLASS = "text-foreground hover:text-primary transition-colors"
-const PRIMARY_BG_CLASS = "bg-primary hover:bg-primary/90"
-const PRIMARY_BUTTON_CLASS = "bg-foreground text-background hover:bg-foreground/90 font-medium transition-all"
-const SECONDARY_BUTTON_CLASS = "border border-border hover:bg-accent text-foreground transition-all font-medium"
-
 const getInitials = (firstName: string | undefined, lastName: string | undefined): string => {
   if (!firstName || !lastName) return "NN"
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
@@ -138,7 +133,9 @@ function AppHeader() {
               </Button>
             </Link>
             <Link to="/register">
-              <Button className={`h-9 px-6 text-sm ${PRIMARY_BUTTON_CLASS}`}>Sign up</Button>
+              <Button className="h-9 px-6 text-sm bg-foreground text-background hover:bg-foreground/90 font-medium transition-all">
+                Sign up
+              </Button>
             </Link>
           </>
         )}

@@ -9,7 +9,6 @@ import { Button } from "../components/ui/button"
 import { Check, Trash2, User, Users, Feather, Clock, Search, Folder, Zap, PencilLine, LogIn } from "lucide-react"
 import { Separator } from "../components/ui/separator"
 
-const PRIMARY_TEXT_CLASS = "text-foreground"
 const ACCENT_TEXT_CLASS = "text-primary font-semibold"
 const SOLID_BUTTON_CLASS = "bg-foreground text-background hover:bg-foreground/90 font-semibold transition-all"
 const OUTLINE_BUTTON_CLASS = "border-2 border-border hover:bg-accent text-foreground font-semibold transition-all"
