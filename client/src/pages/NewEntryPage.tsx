@@ -5,9 +5,7 @@ import { useState, useEffect, useCallback, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "../lib/api"
-import { useAuthStore } from "../store/authStore" // Added import for useAuthStore
-
-// New component imports for better UI/UX
+import { useAuthStore } from "../store/auth"
 import { Button } from "../components/ui/button"
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "../components/ui/card"
 import { Input } from "../components/ui/input"
