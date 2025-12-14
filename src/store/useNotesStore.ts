@@ -2,6 +2,8 @@ export interface Note {
   id: string
   title: string
   content: string
+  synopsis?: string
+  isPublic?: boolean
   isBookmarked: boolean
   createdAt: string
   updatedAt: string
