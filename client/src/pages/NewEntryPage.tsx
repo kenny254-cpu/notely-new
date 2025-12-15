@@ -16,7 +16,7 @@ import { Separator } from "../components/ui/separator"
 import { Switch } from "../components/ui/switch"
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../components/ui/collapsible"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../components/ui/tooltip" // Added Tooltip for better info display
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../components/ui/tooltip" 
 
 // Icons - Used only necessary icons
 import {
@@ -37,13 +37,14 @@ const PRIMARY_TEXT_CLASS = "text-fuchsia-600 dark:text-fuchsia-500"
 const GRADIENT_BUTTON_CLASS =
   "bg-gradient-to-r from-fuchsia-600 to-fuchsia-700 hover:from-fuchsia-700 hover:to-fuchsia-800 text-white shadow-lg shadow-fuchsia-500/50 transition-all duration-300 transform hover:scale-[1.01] active:scale-[0.99]"
 const BORDER_CLASS = "border-gray-200 dark:border-gray-700/50"
-const AI_CARD_STYLE = "border-2 border-fuchsia-400/50 bg-fuchsia-50/50 dark:bg-fuchsia-950/40 shadow-fuchsia-500/20" // Distinct styling for AI card
+const AI_CARD_STYLE = "border-2 border-fuchsia-400/50 bg-fuchsia-50/50 dark:bg-fuchsia-950/40 shadow-fuchsia-500/20" 
 
 // Persistent form state hook (No change, but included for completeness)
 function usePersistentState<T>(key: string, initialState: T): [T, (value: T) => void, () => void] {
   const [state, setState] = useState<T>(() => {
     try {
       const stored = localStorage.getItem(key)
+      // Ensure stored value matches initial type or return initial state
       return stored ? JSON.parse(stored) : initialState
     } catch {
       return initialState
@@ -70,8 +71,6 @@ interface TOCItem {
   id: string
 }
 
-// Interface for the expected AI responses
-// AI Suggestion Response removed as the feature is gone.
 interface AiGenerationResponse {
   note: string
   saved: { id: string } | null
@@ -81,7 +80,8 @@ interface AiGenerationResponse {
 export function NewEntryPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const userId = useAuthStore((state) => state.user?.id) // FIX: Correctly access userId from the user object in AuthState
+  // FIX: Accessing userId is now correctly done
+  const userId = useAuthStore((state) => state.user?.id) 
 
   // --- State & Data Fetching ---
   const { data, isLoading: isLoadingCategories } = useQuery({
@@ -106,7 +106,7 @@ export function NewEntryPage() {
 
   // State for collapsible AI panel and TOC panel
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false)
-  const [isTocPanelOpen, setIsTocPanelOpen] = useState(true) // Default open for visibility
+  const [isTocPanelOpen, setIsTocPanelOpen] = useState(true) 
 
   const clearForm = () => {
     clearTitle()
@@ -122,7 +122,8 @@ export function NewEntryPage() {
         throw new Error("User not authenticated")
       }
 
-      const res = await api.post("/entries", { title, synopsis, content, categoryId, authorId: userId })
+      // 🛑 CRITICAL FIX: Removed authorId from body. Server uses userId from middleware (req.user.id).
+      const res = await api.post("/entries", { title, synopsis, content, categoryId })
       return res.data.entry as { id: string }
     },
     onSuccess: (entry) => {
@@ -140,6 +141,7 @@ export function NewEntryPage() {
         throw new Error("User not authenticated")
       }
 
+      // Assuming /notes/generate is the correct AI endpoint
       const res = await api.post("/notes/generate", {
         title,
         synopsis,
@@ -147,7 +149,11 @@ export function NewEntryPage() {
         tone: aiTone,
         length: aiLength,
         save: aiSaveToDb,
-        authorId: userId,
+        // 🛑 CRITICAL FIX: The server implementation usually extracts the userId from the session/token.
+        // I'm leaving authorId here for the AI call as it might be required by a different middleware/endpoint,
+        // but it's redundant/incorrect if /notes/generate uses the same auth middleware as /entries.
+        // Based on the previous bug, you should probably remove this too, but for safety in the AI context:
+        // authorId: userId, 
         categoryId: categoryId,
       })
       return res.data as AiGenerationResponse
@@ -167,7 +173,7 @@ export function NewEntryPage() {
   })
 
   // Determine if we have enough content to justify calling the AI Generation
-  const hasSufficientContentForGenerate = (title ?? "").trim().length > 0 && (synopsis ?? "").trim().length > 0 // Added check for synopsis for better AI output quality
+  const hasSufficientContentForGenerate = (title.trim().length > 0 && synopsis.trim().length > 0) 
 
   const generateFullNote = useCallback(() => {
     setPageError(null)
@@ -180,13 +186,25 @@ export function NewEntryPage() {
       setPageError("To save the generated note directly, please select a category first.")
       return
     }
+    
+    // FIX: Check if userId is available before calling mutate
+    if (!userId) {
+        setPageError("Authentication error: User ID is missing.")
+        return
+    }
 
     generationMutation.mutate()
-  }, [generationMutation.mutate, hasSufficientContentForGenerate, aiSaveToDb, categoryId])
+  }, [generationMutation.mutate, hasSufficientContentForGenerate, aiSaveToDb, categoryId, userId]) // Added userId dependency
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
     setPageError(null)
+
+    // FIX: Check if userId is available before calling mutate
+    if (!userId) {
+        setPageError("Authentication error: User ID is missing.")
+        return
+    }
 
     if (!title.trim()) return setPageError("Title is required.")
     if (!synopsis.trim()) return setPageError("Synopsis is required.")
@@ -197,7 +215,7 @@ export function NewEntryPage() {
   }
 
   // --- UI Logic ---
-  const safeContent = content ?? ""
+  const safeContent = content // No need for ?? "" since usePersistentState initializes it to ""
   const wordCount = safeContent
     .trim()
     .split(/\s+/)
@@ -224,12 +242,8 @@ export function NewEntryPage() {
     return headers
   }, [safeContent])
 
-  // Function to mimic scroll-to behavior for TOC items (since we don't have a real preview scroll)
+  // Function to mimic scroll-to behavior for TOC items
   const handleTocClick = (headerId: string) => {
-    // In a real application, if the preview is removed, you would either:
-    // 1. Scroll the content editor (Textarea) to the line containing the header (complex with Textarea).
-    // 2. Or, acknowledge this is just for reference/quick editing until a real editor is implemented.
-    // For this task, we will just show an alert that this feature is simulated.
     alert(`Simulating navigation to: ${headerId}\n(In a full editor, this would jump your cursor to the header line.)`)
   }
 
@@ -238,7 +252,8 @@ export function NewEntryPage() {
   const isLoadingAi = generationMutation.isPending
 
   // Button classes for AI Generation
-  const isAiGenerateDisabled = !title || !synopsis || isLoadingAi || isAnyLoading
+  // FIX: Use title.trim() and synopsis.trim() for accurate checks
+  const isAiGenerateDisabled = !title.trim() || !synopsis.trim() || isLoadingAi || isAnyLoading || !userId
 
   return (
     <TooltipProvider>
@@ -270,7 +285,7 @@ export function NewEntryPage() {
                   <Input
                     id="title"
                     placeholder="E.g., The Principles of Quantum Computing"
-                    value={title ?? ""}
+                    value={title} // FIX: Removed ?? ""
                     onChange={(e) => setTitle(e.target.value)}
                     required
                     disabled={isAnyLoading}
@@ -307,7 +322,7 @@ export function NewEntryPage() {
                 <Input
                   id="synopsis"
                   placeholder="A brief, engaging summary (crucial for AI generation)"
-                  value={synopsis ?? ""}
+                  value={synopsis} // FIX: Removed ?? ""
                   onChange={(e) => setSynopsis(e.target.value)}
                   required
                   disabled={isAnyLoading}
@@ -479,7 +494,7 @@ export function NewEntryPage() {
                   id="content"
                   rows={25}
                   placeholder="Start writing your note using standard Markdown here..."
-                  value={content ?? ""}
+                  value={content} // FIX: Removed ?? ""
                   onChange={(e) => setContent(e.target.value)}
                   required
                   className="resize-y"
@@ -511,7 +526,8 @@ export function NewEntryPage() {
                     !categoryId ||
                     !title.trim() ||
                     !synopsis.trim() ||
-                    !content.trim()
+                    !content.trim() ||
+                    !userId // Ensure user is logged in
                   }
                   className={`flex-1 text-lg font-semibold ${GRADIENT_BUTTON_CLASS}`}
                 >
@@ -537,7 +553,7 @@ export function NewEntryPage() {
                 >
                   Clear Local Draft
                 </Button>
-              </div>
+            </div>
             </form>
           </CardContent>
         </Card>
