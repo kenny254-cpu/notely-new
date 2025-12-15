@@ -12,39 +12,39 @@ const router = Router()
 // ----------------------------------------------------------------------
 
 /** * GET /api/public/entries/:id - Allows access to public notes without authentication.
- * * NOTE: The client's share URL is usually built using the note's internal UUID or a
- * generated publicShareId. Since your 404 showed /api/public/entries/ID, we use the internal ID
- * but enforce the 'isPublic: true' check.
- */
+ * * NOTE: The client's share URL is usually built using the note's internal UUID or a
+ * generated publicShareId. Since your 404 showed /api/public/entries/ID, we use the internal ID
+ * but enforce the 'isPublic: true' check.
+ */
 router.get("/public/entries/:id", async (req: Request<{ id: string }>, res, next) => {
-  try {
-    const { id } = req.params
+  try {
+    const { id } = req.params
 
-    // 1. Find the entry by its internal ID
-    const entry = await prisma.entry.findUnique({
-      where: { id },
-      include: {
-        category: {
-          select: { id: true, name: true },
-        },
-      },
-    })
+    // 1. Find the entry by its internal ID
+    const entry = await prisma.entry.findUnique({
+      where: { id },
+      include: {
+        category: {
+          select: { id: true, name: true },
+        },
+      },
+    })
 
-    // 2. Check existence AND public status
-    if (!entry || !entry.isPublic) {
-      // Respond with 404 (Not Found) to avoid leaking information about private note IDs
-      return res.status(404).json({ message: "Entry not found or is private." })
-    }
+    // 2. Check existence AND public status
+    if (!entry || !entry.isPublic) {
+      // Respond with 404 (Not Found) to avoid leaking information about private note IDs
+      return res.status(404).json({ message: "Entry not found or is private." })
+    }
 
-    // 3. Success: return the public entry data
-    return res.json({ entry })
-  } catch (err) {
-    // Log error and pass to error handler
-    console.error("Error fetching public entry:", err)
-    // Using 400 for bad request/invalid ID format, 500 for true server error
-    res.status(500).json({ message: "An unexpected error occurred." })
-    // next(err); // Option to use Express error handler
-  }
+    // 3. Success: return the public entry data
+    return res.json({ entry })
+  } catch (err) {
+    // Log error and pass to error handler
+    console.error("Error fetching public entry:", err)
+    // Using 400 for bad request/invalid ID format, 500 for true server error
+    res.status(500).json({ message: "An unexpected error occurred." })
+    // next(err); // Option to use Express error handler
+  }
 })
 
 // ----------------------------------------------------------------------
@@ -53,26 +53,26 @@ router.get("/public/entries/:id", async (req: Request<{ id: string }>, res, next
 router.use(requireAuth)
 
 // ----------------------------------------------------------------------
-// 🎯 FIX: Define interfaces for Request Body data
+// 🎯 Define interfaces for Request Body data
 // ----------------------------------------------------------------------
 
 interface EntryCreationData {
-  title: string
-  synopsis: string
-  content: string
-  categoryId: string
-  pinned?: boolean
-  isPublic?: boolean
+  title: string
+  synopsis: string
+  content: string
+  categoryId: string
+  pinned?: boolean
+  isPublic?: boolean
 }
 
 interface EntryUpdateData {
-  title?: string
-  synopsis?: string
-  content?: string
-  categoryId?: string
-  pinned?: boolean
-  isPublic?: boolean
-  // Add other potential update fields here if necessary
+  title?: string
+  synopsis?: string
+  content?: string
+  categoryId?: string
+  pinned?: boolean
+  isPublic?: boolean
+  // Add other potential update fields here if necessary
 }
 
 // ----------------------------------------------------------------------
@@ -80,257 +80,266 @@ interface EntryUpdateData {
 // ----------------------------------------------------------------------
 
 const entryInclude = {
-  category: {
-    select: { id: true, name: true },
-  },
+  category: {
+    select: { id: true, name: true },
+  },
 }
 
 /** Helper — generate short public share IDs */
 function generateShareId() {
-  return crypto.randomBytes(8).toString("hex") // 16-char slug
+  return crypto.randomBytes(8).toString("hex") // 16-char slug
 }
 
 // ----------------------------------------------------------------------
-// POST /api/entries - create a new entry (UPDATED FOR TYPE CASTING)
-// Use the custom Request body type for better safety
+// POST /api/entries - create a new entry (UPDATED FOR UNIQUE SHARE ID FIX)
+// ----------------------------------------------------------------------
 router.post("/", async (req: Request<{}, {}, EntryCreationData>, res, next) => {
-  try {
-    const userId = req.user!.id
-    // 🎯 FIX APPLIED: TypeScript now recognizes the shape of req.body
-    const { title, synopsis, content, categoryId, pinned, isPublic } = req.body
+  try {
+    const userId = req.user!.id
+    const { title, synopsis, content, categoryId, pinned, isPublic } = req.body
 
-    if (!title || !synopsis || !content || !categoryId) {
-      return res.status(400).json({ message: "Title, synopsis, content, and categoryId are required." })
-    }
+    if (!title || !synopsis || !content || !categoryId) {
+      return res.status(400).json({ message: "Title, synopsis, content, and categoryId are required." })
+    }
 
-    const categoryExists = await prisma.category.findUnique({ where: { id: categoryId } })
-    if (!categoryExists) return res.status(404).json({ message: "Invalid categoryId provided." })
+    const categoryExists = await prisma.category.findUnique({ where: { id: categoryId } })
+    if (!categoryExists) return res.status(404).json({ message: "Invalid categoryId provided." })
 
-    let publicShareId: string | null = null
-    if (isPublic) {
-      let attempts = 0
-      let isUnique = false
+    let entry = null
+    let publicShareId: string | null = null
+    let attempts = 0
+    const MAX_ATTEMPTS = 5 // Limit retries to prevent infinite loops
 
-      while (!isUnique && attempts < 10) {
-        publicShareId = generateShareId()
-        const existing = await prisma.entry.findUnique({
-          where: { publicShareId },
-        })
-        if (!existing) {
-          isUnique = true
-        }
-        attempts++
-      }
+    // 🎯 FIX: Implement a retry loop to handle Unique Constraint Errors (race conditions)
+    while (!entry && attempts < MAX_ATTEMPTS) {
+      attempts++
 
-      if (!isUnique) {
-        return res.status(500).json({ message: "Could not generate unique share ID. Please try again." })
-      }
-    }
+      // 1. Generate new share ID for each attempt if needed
+      publicShareId = isPublic ? generateShareId() : null
 
-    const entry = await prisma.entry.create({
-      data: {
-        title,
-        synopsis,
-        content,
-        userId,
-        categoryId,
-        pinned: pinned ?? false,
-        isPublic: isPublic ?? false,
-        publicShareId,
-      },
-      include: entryInclude,
-    })
+      try {
+        // 2. Attempt to create the entry
+        entry = await prisma.entry.create({
+          data: {
+            title,
+            synopsis,
+            content,
+            userId,
+            categoryId,
+            pinned: pinned ?? false,
+            isPublic: isPublic ?? false,
+            publicShareId,
+          },
+          include: entryInclude,
+        })
+      } catch (error: any) {
+        // 3. Catch a unique constraint error (P2002 is the Prisma error code)
+        if (error.code === 'P2002' && error.meta?.target.includes('publicShareId')) {
+          // Conflict on publicShareId. Loop will continue to retry with a new ID.
+          console.warn(`Conflict on publicShareId: ${publicShareId}. Retrying... (Attempt ${attempts})`)
+          continue // Immediately jump to the next iteration
+        }
+        // 4. Rethrow any other error (including categoryId constraint failure, etc.)
+        throw error
+      }
+    }
 
-    return res.status(201).json({ entry })
-  } catch (err) {
-    next(err)
-  }
+    // 5. Check if creation failed after max attempts
+    if (!entry) {
+      return res.status(500).json({ message: "Could not create entry due to persistent ID conflict." })
+    }
+
+    // 6. Success
+    return res.status(201).json({ entry })
+  } catch (err) {
+    next(err)
+  }
 })
 
 // ----------------------------------------------------------------------
 // GET /api/entries - unchanged
 router.get("/", async (req, res, next) => {
-  try {
-    const userId = req.user!.id
+  try {
+    const userId = req.user!.id
 
-    const entries = await prisma.entry.findMany({
-      where: { userId, isDeleted: false },
-      orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
-      include: entryInclude,
-    })
+    const entries = await prisma.entry.findMany({
+      where: { userId, isDeleted: false },
+      orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
+      include: entryInclude,
+    })
 
-    // ⭐ THE FIX: Map over the entries to format the dates
-    const formattedEntries = entries.map((entry) => ({
-      ...entry,
-      // Convert Date object to standard ISO string (e.g., "2025-12-13T17:22:08.000Z")
-      // This is usually redundant but ensures the Date object is converted *before* JSON.stringify
-      createdAt: entry.createdAt.toISOString(),
-      updatedAt: entry.updatedAt.toISOString(),
-    }))
+    // ⭐ THE FIX: Map over the entries to format the dates
+    const formattedEntries = entries.map((entry) => ({
+      ...entry,
+      // Convert Date object to standard ISO string (e.g., "2025-12-13T17:22:08.000Z")
+      // This is usually redundant but ensures the Date object is converted *before* JSON.stringify
+      createdAt: entry.createdAt.toISOString(),
+      updatedAt: entry.updatedAt.toISOString(),
+    }))
 
-    return res.json({ entries: formattedEntries }) // Use the formatted entries
-  } catch (err) {
-    next(err)
-  }
+    return res.json({ entries: formattedEntries }) // Use the formatted entries
+  } catch (err) {
+    next(err)
+  }
 })
 
 // ----------------------------------------------------------------------
 // GET /api/entries/trash - unchanged
 router.get("/trash", async (req, res, next) => {
-  try {
-    const userId = req.user!.id
+  try {
+    const userId = req.user!.id
 
-    const entries = await prisma.entry.findMany({
-      where: { userId, isDeleted: true },
-      orderBy: { createdAt: "desc" },
-      include: entryInclude,
-    })
+    const entries = await prisma.entry.findMany({
+      where: { userId, isDeleted: true },
+      orderBy: { createdAt: "desc" },
+      include: entryInclude,
+    })
 
-    return res.json({ entries })
-  } catch (err) {
-    next(err)
-  }
+    return res.json({ entries })
+  } catch (err) {
+    next(err)
+  }
 })
 
 // ----------------------------------------------------------------------
 // GET /api/entry/:id - unchanged
 router.get("/:id", async (req, res, next) => {
-  try {
-    const userId = req.user!.id
-    const { id } = req.params
+  try {
+    const userId = req.user!.id
+    const { id } = req.params
 
-    const entry = await prisma.entry.findFirst({
-      where: { id, userId, isDeleted: false },
-      include: entryInclude,
-    })
+    const entry = await prisma.entry.findFirst({
+      where: { id, userId, isDeleted: false },
+      include: entryInclude,
+    })
 
-    if (!entry) return res.status(404).json({ message: "Entry not found." })
+    if (!entry) return res.status(404).json({ message: "Entry not found." })
 
-    return res.json({ entry })
-  } catch (err) {
-    next(err)
-  }
+    return res.json({ entry })
+  } catch (err) {
+    next(err)
+  }
 })
 
 // ----------------------------------------------------------------------
 // PATCH /api/entry/:id (UPDATED FOR TYPE CASTING)
 // Use the custom Request body type for better safety
 router.patch("/:id", async (req: Request<{ id: string }, {}, EntryUpdateData>, res, next) => {
-  try {
-    const userId = req.user!.id
-    const { id } = req.params
-    // 🎯 FIX APPLIED: TypeScript now recognizes the shape of req.body
-    const { title, synopsis, content, categoryId, pinned, isPublic } = req.body
+  try {
+    const userId = req.user!.id
+    const { id } = req.params
+    // 🎯 FIX APPLIED: TypeScript now recognizes the shape of req.body
+    const { title, synopsis, content, categoryId, pinned, isPublic } = req.body
 
-    const existing = await prisma.entry.findFirst({ where: { id, userId } })
-    if (!existing || existing.isDeleted) return res.status(404).json({ message: "Entry not found." })
+    const existing = await prisma.entry.findFirst({ where: { id, userId } })
+    if (!existing || existing.isDeleted) return res.status(404).json({ message: "Entry not found." })
 
-    // The type of updateData is inferred correctly by Prisma as Partial<Entry>
-    const updateData: any = {}
+    // The type of updateData is inferred correctly by Prisma as Partial<Entry>
+    const updateData: any = {}
 
-    if (title !== undefined) updateData.title = title
-    if (synopsis !== undefined) updateData.synopsis = synopsis
-    if (content !== undefined) updateData.content = content
+    if (title !== undefined) updateData.title = title
+    if (synopsis !== undefined) updateData.synopsis = synopsis
+    if (content !== undefined) updateData.content = content
 
-    // 🎯 FIX APPLIED: categoryId is now safely accessed
-    if (categoryId !== undefined) {
-      const valid = await prisma.category.findUnique({ where: { id: categoryId } })
-      if (!valid) return res.status(404).json({ message: "Invalid categoryId provided." })
-      updateData.categoryId = categoryId
-    }
+    // 🎯 FIX APPLIED: categoryId is now safely accessed
+    if (categoryId !== undefined) {
+      const valid = await prisma.category.findUnique({ where: { id: categoryId } })
+      if (!valid) return res.status(404).json({ message: "Invalid categoryId provided." })
+      updateData.categoryId = categoryId
+    }
 
-    // 🎯 FIX APPLIED: pinned is now safely accessed
-    if (pinned !== undefined) updateData.pinned = pinned
+    // 🎯 FIX APPLIED: pinned is now safely accessed
+    if (pinned !== undefined) updateData.pinned = pinned
 
-    // Handle public/private with share link regeneration
-    // 🎯 FIX APPLIED: isPublic is now safely accessed
-    if (isPublic !== undefined) {
-      updateData.isPublic = isPublic
+    // Handle public/private with share link regeneration
+    // 🎯 FIX APPLIED: isPublic is now safely accessed
+    if (isPublic !== undefined) {
+      updateData.isPublic = isPublic
 
-      if (isPublic && !existing.publicShareId) {
-        // Generate a share ID only if making public and one doesn't exist
-        updateData.publicShareId = generateShareId()
-      }
+      if (isPublic && !existing.publicShareId) {
+        // Generate a share ID only if making public and one doesn't exist
+        updateData.publicShareId = generateShareId()
+      }
 
-      // 🎯 FIX APPLIED: The explicit check is safe
-      if (!isPublic) {
-        // Clear the share ID if making private
-        updateData.publicShareId = null
-      }
-    }
+      // 🎯 FIX APPLIED: The explicit check is safe
+      if (!isPublic) {
+        // Clear the share ID if making private
+        updateData.publicShareId = null
+      }
+    }
 
-    const entry = await prisma.entry.update({
-      where: { id },
-      data: updateData,
-      include: entryInclude,
-    })
+    const entry = await prisma.entry.update({
+      where: { id },
+      data: updateData,
+      include: entryInclude,
+    })
 
-    return res.json({ entry })
-  } catch (err) {
-    next(err)
-  }
+    return res.json({ entry })
+  } catch (err) {
+    next(err)
+  }
 })
 
 // ----------------------------------------------------------------------
 // RESTORE — unchanged
 router.patch("/restore/:id", async (req, res, next) => {
-  try {
-    const userId = req.user!.id
-    const { id } = req.params
+  try {
+    const userId = req.user!.id
+    const { id } = req.params
 
-    const existing = await prisma.entry.findFirst({ where: { id, userId } })
-    if (!existing || !existing.isDeleted) return res.status(404).json({ message: "Entry not found in trash." })
+    const existing = await prisma.entry.findFirst({ where: { id, userId } })
+    if (!existing || !existing.isDeleted) return res.status(404).json({ message: "Entry not found in trash." })
 
-    const entry = await prisma.entry.update({
-      where: { id },
-      data: { isDeleted: false },
-      include: entryInclude,
-    })
+    const entry = await prisma.entry.update({
+      where: { id },
+      data: { isDeleted: false },
+      include: entryInclude,
+    })
 
-    return res.json({ entry })
-  } catch (err) {
-    next(err)
-  }
+    return res.json({ entry })
+  } catch (err) {
+    next(err)
+  }
 })
 
 // ----------------------------------------------------------------------
 // SOFT DELETE — unchanged
 router.delete("/:id", async (req, res, next) => {
-  try {
-    const userId = req.user!.id
-    const { id } = req.params
+  try {
+    const userId = req.user!.id
+    const { id } = req.params
 
-    const existing = await prisma.entry.findFirst({ where: { id, userId } })
-    if (!existing || existing.isDeleted) return res.status(404).json({ message: "Entry not found." })
+    const existing = await prisma.entry.findFirst({ where: { id, userId } })
+    if (!existing || existing.isDeleted) return res.status(404).json({ message: "Entry not found." })
 
-    const entry = await prisma.entry.update({
-      where: { id },
-      data: { isDeleted: true },
-      include: entryInclude,
-    })
+    const entry = await prisma.entry.update({
+      where: { id },
+      data: { isDeleted: true },
+      include: entryInclude,
+    })
 
-    return res.json({ entry })
-  } catch (err) {
-    next(err)
-  }
+    return res.json({ entry })
+  } catch (err) {
+    next(err)
+  }
 })
 
 // ----------------------------------------------------------------------
 // PERMANENT DELETE — unchanged
 router.delete("/permanent/:id", async (req, res, next) => {
-  try {
-    const userId = req.user!.id
-    const { id } = req.params
+  try {
+    const userId = req.user!.id
+    const { id } = req.params
 
-    const existing = await prisma.entry.findFirst({ where: { id, userId } })
-    if (!existing) return res.status(404).json({ message: "Entry not found." })
+    const existing = await prisma.entry.findFirst({ where: { id, userId } })
+    if (!existing) return res.status(404).json({ message: "Entry not found." })
 
-    await prisma.entry.delete({ where: { id } })
+    await prisma.entry.delete({ where: { id } })
 
-    return res.json({ message: "Entry permanently deleted." })
-  } catch (err) {
-    next(err)
-  }
+    return res.json({ message: "Entry permanently deleted." })
+  } catch (err) {
+    next(err)
+  }
 })
 
 // ----------------------------------------------------------------------
@@ -339,59 +348,59 @@ router.delete("/permanent/:id", async (req, res, next) => {
 
 // Save Entry
 router.post("/:id/bookmark", async (req, res, next) => {
-  try {
-    const userId = req.user!.id
-    const { id: entryId } = req.params
+  try {
+    const userId = req.user!.id
+    const { id: entryId } = req.params
 
-    await prisma.bookmark.upsert({
-      where: { userId_entryId: { userId, entryId } },
-      update: {},
-      create: { userId, entryId },
-    })
+    await prisma.bookmark.upsert({
+      where: { userId_entryId: { userId, entryId } },
+      update: {},
+      create: { userId, entryId },
+    })
 
-    return res.json({ message: "Entry bookmarked." })
-  } catch (err) {
-    next(err)
-  }
+    return res.json({ message: "Entry bookmarked." })
+  } catch (err) {
+    next(err)
+  }
 })
 
 // Remove Entry
 router.delete("/:id/bookmark", async (req, res, next) => {
-  try {
-    const userId = req.user!.id
-    const { id: entryId } = req.params
+  try {
+    const userId = req.user!.id
+    const { id: entryId } = req.params
 
-    await prisma.bookmark.delete({
-      where: { userId_entryId: { userId, entryId } },
-    })
+    await prisma.bookmark.delete({
+      where: { userId_entryId: { userId, entryId } },
+    })
 
-    return res.json({ message: "Bookmark removed." })
-  } catch (err) {
-    next(err)
-  }
+    return res.json({ message: "Bookmark removed." })
+  } catch (err) {
+    next(err)
+  }
 })
 
 // List Bookmarked Entries
 router.get("/bookmarks/all", async (req, res, next) => {
-  try {
-    const userId = req.user!.id
+  try {
+    const userId = req.user!.id
 
-    const bookmarks = await prisma.bookmark.findMany({
-      where: { userId },
-      include: {
-        entry: {
-          include: entryInclude,
-        },
-      },
-    })
+    const bookmarks = await prisma.bookmark.findMany({
+      where: { userId },
+      include: {
+        entry: {
+          include: entryInclude,
+        },
+      },
+    })
 
-    // Map to return only the entry data, or structure as needed
-    const entries = bookmarks.map((b) => ({ ...b.entry, bookmarked: true }))
+    // Map to return only the entry data, or structure as needed
+    const entries = bookmarks.map((b) => ({ ...b.entry, bookmarked: true }))
 
-    return res.json({ entries })
-  } catch (err) {
-    next(err)
-  }
+    return res.json({ entries })
+  } catch (err) {
+    next(err)
+  }
 })
 
 export default router
